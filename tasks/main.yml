@@ -1,0 +1,4 @@
+---
+
+- name: including tasks for current platform -> {{ ansible_os_family }}
+  include: "{{ ansible_os_family }}.yml"
