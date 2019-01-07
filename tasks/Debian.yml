@@ -1,0 +1,46 @@
+---
+
+- name: APT_KEY | Add Apt signing key
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  apt_key:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    state: present
+  register: task_result_1
+
+- name: APT_REPOSITORY | Add APT sources
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    filename: google-chrome
+  with_items:
+    - 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main'
+    - 'deb [arch=amd64] http://dl.google.com/linux/chrome-remote-desktop/deb/ stable main'
+  register: task_result_2
+
+- name: update apt cache
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  apt:
+    update_cache: true
+  when: task_result_1.changed or task_result_2.changed
+
+- name: APT | Update all packages
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  apt:
+    name:
+      - google-chrome-stable
+      - chrome-remote-desktop
+    state: latest
+    update_cache: true
